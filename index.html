@@ -165,11 +165,20 @@
         async function handleUpdateCustomer(e) {
             e.preventDefault();
             const form = e.target;
-            const customerId = form.elements.updateCustomerIdModal.value;
+            const button = form.querySelector('button[type="submit"]');
+            
+            const customerId = document.getElementById('updateCustomerIdModal').value;
             const updatedData = {
-                name: form.elements.updateName.value.trim(), phone: form.elements.updatePhone.value.trim(), email: form.elements.updateEmail.value.trim(), location: form.elements.updateLocation.value.trim(), leadStatus: form.elements.updateStatus.value, priority: form.elements.updatePriority.value, nextFollowUp: form.elements.nextFollowUp.value,
+                name: document.getElementById('updateName').value.trim(),
+                phone: document.getElementById('updatePhone').value.trim(),
+                email: document.getElementById('updateEmail').value.trim(),
+                location: document.getElementById('updateLocation').value.trim(),
+                leadStatus: document.getElementById('updateStatus').value,
+                priority: document.getElementById('updatePriority').value,
+                nextFollowUp: document.getElementById('updateFollowUp').value,
             };
-            if (await handleApiRequest('update-customer', { id: customerId, data: updatedData }, form.querySelector('button[type="submit"]'), 'Customer updated!', '<i class="fas fa-save"></i> Update Customer')) {
+
+            if (await handleApiRequest('update-customer', { id: customerId, data: updatedData }, button, 'Customer updated!', '<i class="fas fa-save"></i> Update Customer')) {
                 closeModal();
             }
         }
@@ -259,6 +268,7 @@
         
         function populateProductDatalist() {
             const productList = document.getElementById('productList');
+            if(!customers || customers.length === 0) return;
             const uniqueProducts = [...new Set(customers.map(c => c.interestedProduct).filter(p => p))];
             productList.innerHTML = uniqueProducts.map(p => `<option value="${p}"></option>`).join('');
         }
@@ -350,7 +360,7 @@
 
         function closeModal() { modal.classList.remove('show'); }
         function formatPhoneForWhatsApp(phone) { let cleaned = (phone || '').replace(/\D/g, ''); if (cleaned.length === 10) { cleaned = '91' + cleaned; } return cleaned; }
-        function toggleButtonLoading(button, isLoading, defaultText = '') { if(button){ button.disabled = isLoading; button.innerHTML = isLoading ? '<i class="fas fa-spinner fa-spin"></i>' : defaultText; }}
+        function toggleButtonLoading(button, isLoading, defaultButtonText = '') { if(button){ button.disabled = isLoading; button.innerHTML = isLoading ? '<i class="fas fa-spinner fa-spin"></i>' : defaultButtonText; }}
         function showNotification(message, isSuccess = true) {
             const notification = document.createElement('div');
             notification.className = 'premium-notification';
