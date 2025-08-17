@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Srikar Jewellers CRM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {--gold-primary: #DCCA87;--gold-secondary: #F5EFE1;--dark-bg: #0C0C0C;--dark-secondary: #181818;--text-primary: #FFFFFF;--text-secondary: #AAAAAA;--transition-fast: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);}
+        * {margin: 0;padding: 0;box-sizing: border-box;}
+        body {font-family: 'Poppins', sans-serif;background-color: var(--dark-bg);color: var(--text-secondary);min-height: 100vh;}
+        .container {max-width: 1800px;margin: 1rem;background: var(--dark-secondary);border: 1px solid rgba(220, 202, 135, 0.15);border-radius: 20px;overflow: hidden;}
+        .header {padding: 2rem 1.5rem;background: #111111;border-bottom: 1px solid rgba(220, 202, 135, 0.15);display: flex;align-items: center;justify-content: space-between;flex-wrap: wrap; gap: 1rem;}
+        .header-text h1 {font-family: 'Cormorant Garamond', serif;font-size: 2.5rem;color: var(--gold-primary);}
+        .header-user-info { display: flex; align-items: center; gap: 1rem; }
+        .logo-container .logo {width: 60px;height: 60px;border-radius: 50%;border: 2px solid var(--gold-primary);box-shadow: 0 0 20px rgba(220, 202, 135, 0.3);}
+        .nav-tabs {background: var(--dark-secondary);padding: 0 1rem;display: flex;border-bottom: 1px solid rgba(220, 202, 135, 0.1);overflow-x: auto;}
+        .nav-tabs button {background: transparent;border: none;padding: 1.2rem 1rem;font-size: 1rem;cursor: pointer;color: var(--text-secondary);border-bottom: 3px solid transparent;transition: var(--transition-fast);white-space: nowrap;}
+        .nav-tabs button:hover, .nav-tabs button.active {color: var(--gold-primary);}
+        .nav-tabs button.active {border-bottom-color: var(--gold-primary);}
+        .nav-tabs button i {margin-right: 0.75rem;}
+        .tab-content {padding: 1.5rem; display: none;}
+        .tab-content.active {display: block; animation: fadeIn 0.6s ease-out;}
+        @keyframes fadeIn {from {opacity: 0;transform: translateY(15px);} to {opacity: 1;transform: translateY(0);}}
+        .section-title {font-family: 'Cormorant Garamond', serif;font-size: 2.2rem;color: var(--gold-primary);margin-bottom: 2rem;text-align: center;}
+        .premium-card {background: #111111;border: 1px solid rgba(220, 202, 135, 0.1);border-radius: 15px;padding: 1.5rem;margin-bottom: 2rem;}
+        .form-grid {display: grid;grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));gap: 1.5rem;}
+        .form-group {display: flex;flex-direction: column;}
+        .form-group label {margin-bottom: 0.75rem;font-weight: 500;color: var(--gold-secondary);font-size: 0.9rem;text-transform: uppercase;}
+        .form-group input, .form-group select, .form-group textarea {width: 100%;padding: 0.8rem 1rem;border: 1px solid rgba(220, 202, 135, 0.2);border-radius: 8px;font-size: 1rem;background: var(--dark-secondary);color: var(--text-primary);transition: var(--transition-fast);}
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {outline: none;border-color: var(--gold-primary);}
+        .btn {padding: 0.8rem 1.8rem;border: 1px solid var(--gold-primary);border-radius: 8px;cursor: pointer;font-size: 1rem;font-weight: 600;text-transform: uppercase;transition: var(--transition-fast);}
+        .btn-primary {background: var(--gold-primary);color: var(--dark-bg);}
+        .btn-primary:hover {background: #EADCA6;}
+        .btn-secondary {background: transparent;color: var(--gold-primary);}
+        .btn-secondary:hover {background: rgba(220, 202, 135, 0.1);}
+        .btn-danger {background: #d9534f;color: white;border-color: #d9534f;}
+        .btn-danger:hover {background: #c9302c;}
+        .btn:disabled {background: #555;border-color: #555;color: #888;cursor: not-allowed;}
+        .premium-table {width: 100%;border-collapse: collapse;background: #111111;border-radius: 15px;overflow: hidden;}
+        .premium-table th, .premium-table td {padding: 1.2rem 1rem;text-align: left;border-bottom: 1px solid rgba(220, 202, 135, 0.1);}
+        .premium-table th {background: var(--dark-secondary);color: var(--gold-primary);text-transform: uppercase;}
+        .premium-table tbody tr:hover {background: var(--dark-secondary);}
+        .premium-notification {position: fixed;bottom: 20px;right: 20px;left: 20px; text-align:center; padding: 1rem;background: linear-gradient(145deg, #EADCA6 0%, #DCCA87 100%);color: var(--dark-bg);border-radius: 10px;z-index: 9999;font-weight: 600;animation: slideUp 0.5s ease forwards, slideDown 0.5s ease 4.5s forwards;}
+        @keyframes slideUp {from {transform: translateY(150%);} to {transform: translateY(0);}}
+        @keyframes slideDown {from {transform: translateY(0);opacity: 1;} to {transform: translateY(150%);opacity: 0;}}
+        .modal-premium {position: fixed;top: 0;left: 0;width: 100%;height: 100%;background: rgba(0, 0, 0, 0.7);backdrop-filter: blur(10px);z-index: 1000;display: none;align-items: center;justify-content: center;opacity: 0;transition: opacity 0.4s ease;}
+        .modal-premium.show {display: flex;opacity: 1;}
+        .modal-content {background: var(--dark-secondary);border: 1px solid rgba(220, 202, 135, 0.2);border-radius: 20px;padding: 1.5rem;width: 95%;max-height: 90vh;overflow-y: auto;}
+        .chart-container {height: 300px;padding: 1rem;background: #1C1C1C;border-radius: 10px;margin-top: 1.5rem;}
+        .follow-up-item {background: #1a1a1a;padding: 1rem;border-radius: 8px;margin-bottom: 1rem;border-left: 4px solid var(--gold-primary); cursor: pointer; transition: background-color 0.3s ease;}
+        .follow-up-item:hover { background-color: #2a2a2a; }
+        .follow-up-item.overdue {border-left-color: #d9534f;}
+        .contact-links {display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;}
+        .contact-links a {padding: 0.3rem 0.6rem; border-radius: 5px; text-decoration: none; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 0.3rem; transition: var(--transition-fast);}
+        .phone-link { background: rgba(92, 184, 230, 0.1); color: #5cb8e6; border: 1px solid rgba(92, 184, 230, 0.3); }
+        .phone-link:hover { background: rgba(92, 184, 230, 0.2); }
+        .whatsapp-link { background: rgba(37, 211, 102, 0.1); color: #25D366; border: 1px solid rgba(37, 211, 102, 0.3); }
+        .whatsapp-link:hover { background: rgba(37, 211, 102, 0.2); }
+        .analytics-card-small { padding: 1rem; text-align: center; }
+        .analytics-card-small h4 { font-size: 1.5rem; color: var(--gold-primary); }
+        .analytics-card-small p { font-size: 0.9rem; }
+        
+        @media (min-width: 769px) {
+            .container { margin: 2rem auto; }
+            .header { padding: 3rem 2.5rem; }
+            .header-text h1 { font-size: 3.5rem; }
+            .logo-container .logo { width: 80px; height: 80px; }
+            .tab-content { padding: 2.5rem; }
+            .section-title { font-size: 2.8rem; }
+            .premium-card { padding: 2rem; }
+            .modal-content { padding: 2.5rem; }
+        }
+
+        @media (max-width: 768px) {
+            .container { margin: 0; border-radius: 0; }
+            .header { justify-content: center; text-align: center; }
+            .header-text h1 { font-size: 2.2rem; }
+            .header-text p { font-size: 1rem; }
+            .premium-table { border-radius: 0; border: none; }
+            .premium-table thead { display: none; }
+            .premium-table, .premium-table tbody, .premium-table tr, .premium-table td { display: block; width: 100%; }
+            .premium-table tr { 
+                margin-bottom: 1rem;
+                border: 1px solid rgba(220, 202, 135, 0.15);
+                border-radius: 10px;
+                padding: 1rem;
+            }
+            .premium-table td {
+                padding: 0.75rem 0.5rem;
+                padding-left: 50%;
+                text-align: right;
+                position: relative;
+                border-bottom: 1px solid #222;
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+            }
+            .premium-table td:last-child { border-bottom: none; }
+            .premium-table td::before {
+                content: attr(data-label);
+                position: absolute;
+                left: 0.5rem;
+                width: 45%;
+                padding-right: 10px;
+                white-space: nowrap;
+                text-align: left;
+                font-weight: bold;
+                color: var(--gold-secondary);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" style="display: none;">
+        <header class="header">
+            <div class="header-text"><h1>Srikar Jewellers</h1><p>Admin Portal</p></div>
+            <div class="header-user-info">
+                <span id="user-email-display" style="color: var(--gold-secondary);"></span>
+                <button id="logoutButton" class="btn btn-secondary" style="padding: 0.5rem 1rem;">Logout</button>
+            </div>
+            <div class="logo-container"><img src="logo.jpeg" alt="Srikar Jewellers Logo" class="logo"></div>
+        </header>
+        <div class="nav-tabs">
+            <button class="tab-button active" onclick="showTab('add-customer', this)"><i class="fas fa-plus-circle"></i> Add Customer</button>
+            <button class="tab-button" onclick="showTab('daily-updates', this)"><i class="fas fa-comments"></i> Daily Updates</button>
+            <button class="tab-button" onclick="showTab('follow-ups', this)"><i class="fas fa-calendar-check"></i> Follow-ups</button>
+            <button class="tab-button" onclick="showTab('customer-list', this)"><i class="fas fa-users"></i> Database</button>
+            <button class="tab-button" onclick="showTab('history', this)"><i class="fas fa-history"></i> Customer History</button>
+            <button class="tab-button" onclick="showTab('analytics', this)"><i class="fas fa-chart-pie"></i> Analytics</button>
+        </div>
+
+        <div id="add-customer" class="tab-content active"><h2 class="section-title">Record New Lead</h2><div class="premium-card"><form id="customerForm"><div class="form-grid"><div class="form-group"><label for="customerName">Customer Name</label><input type="text" id="customerName"></div><div class="form-group"><label for="phoneNumber">Phone Number *</label><input type="tel" id="phoneNumber" required></div><div class="form-group"><label for="email">Email Address</label><input type="email" id="email"></div><div class="form-group"><label for="location">Location</label><input type="text" id="location"></div><div class="form-group"><label for="adSource">Lead Source</label><select id="adSource"><option value="">Select Source</option><option value="Instagram">Instagram</option><option value="Facebook">Facebook</option><option value="Referral">Referral</option><option value="Walk-in">Walk-in</option><option value="Other">Other</option></select></div><div class="form-group"><label for="interestedProduct">Product of Interest</label><input type="text" id="interestedProduct" list="productList" placeholder="e.g., Gold Haram"><datalist id="productList"></datalist></div><div class="form-group"><label for="budget">Estimated Budget</label><select id="budget"><option value="">Select Budget</option><option value="<50k">Under ₹50,000</option><option value="50k-1L">₹50k - ₹1 Lakh</option><option value="1L-3L">₹1 Lakh - ₹3 Lakh</option><option value=">5L">Above ₹5 Lakh</option></select></div><div class="form-group"><label for="leadStatus">Initial Status</label><select id="leadStatus"><option value="New">New</option><option value="Contacted">Contacted</option><option value="Interested">Interested</option><option value="Follow-up">Follow-up</option></select></div><div class="form-group"><label for="priority">Priority</label><select id="priority"><option value="Medium">Medium</option><option value="High">High</option><option value="Low">Low</option></select></div><div class="form-group"><label for="nextFollowUp">Next Follow-up</label><input type="date" id="nextFollowUp"></div></div><div class="form-group" style="margin-top:1.5rem;"><label for="initialResponse">Notes</label><textarea id="initialResponse" rows="3"></textarea></div><div style="text-align: center; margin-top: 2rem;"><button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Customer</button></div></form></div></div>
+        <div id="daily-updates" class="tab-content"><h2 class="section-title">Daily Customer Updates</h2><div class="premium-card"><h3 style="color: var(--gold-primary); margin-bottom: 1.5rem;"><i class="fas fa-plus-circle"></i> Add Daily Update</h3><form id="dailyUpdateForm"><div class="form-grid"><div class="form-group"><label>Select Customer</label><select id="updateCustomerId" required><option value="">Choose Customer...</option></select></div><div class="form-group"><label>Support Person</label><input type="text" id="supportPerson" required></div><div class="form-group"><label>Interaction Type</label><select id="callStatus"><option value="Phone Call">Phone Call</option><option value="WhatsApp">WhatsApp</option><option value="Store Visit">Store Visit</option><option value="Email">Email</option></select></div></div><div class="form-group" style="margin-top: 1rem;"><label>Daily Comment/Update *</label><textarea id="dailyComment" rows="4" required></textarea></div><div style="text-align: center; margin-top: 1.5rem;"><button type="submit" class="btn btn-primary"><i class="fas fa-comment-medical"></i> Add Update</button></div></form></div><div class="premium-card"><h3 style="color: var(--gold-primary); margin-bottom: 1.5rem;"><i class="fas fa-history"></i> Recent Updates</h3><div id="dailyUpdatesList"></div></div></div>
+        <div id="follow-ups" class="tab-content"><h2 class="section-title">Follow-up Schedule</h2><div class="form-grid"><div class="premium-card"><h3><i class="fas fa-fire" style="color:#d9534f;"></i> Overdue</h3><div id="overdueFollowUps"></div></div><div class="premium-card"><h3><i class="fas fa-star" style="color:#f0ad4e;"></i> Today</h3><div id="todayFollowUps"></div></div><div class="premium-card"><h3><i class="fas fa-calendar-day" style="color:#5bc0de;"></i> Upcoming</h3><div id="upcomingFollowUps"></div></div></div></div>
+        <div id="customer-list" class="tab-content"><h2 class="section-title">Customer Database</h2><div class="premium-card"><div class="form-grid"><div class="form-group"><label>Search by Name/Phone</label><input type="text" id="searchInput" oninput="renderAll()"></div><div class="form-group"><label>Filter by Status</label><select id="statusFilter" onchange="renderAll()"><option value="">All Statuses</option><option value="New">New</option><option value="Contacted">Contacted</option><option value="Interested">Interested</option><option value="Follow-up">Follow-up</option><option value="Converted">Converted</option><option value="Not Interested">Not Interested</option></select></div><div class="form-group"><label>Filter by Product</label><input type="text" id="productFilter" list="productList" oninput="renderAll()" placeholder="Type or select product..."></div></div></div><div class="table-container"><table class="premium-table"><thead id="customerTableHeader"></thead><tbody id="customerTableBody"></tbody></table></div></div>
+        <div id="history" class="tab-content"><h2 class="section-title">Full Customer History</h2><div class="premium-card"><div class="form-group"><label>Search Customer by Name or Phone</label><input type="text" id="historySearchInput" list="historyCustomerList" placeholder="Start typing a name or phone number..."><datalist id="historyCustomerList"></datalist></div><div style="text-align:center; margin-top:1rem;"><button class="btn btn-secondary" onclick="searchAndDisplayHistory()">Search</button></div></div><div id="customerHistoryLog" class="premium-card" style="display:none;"></div></div>
+        <div id="analytics" class="tab-content"><h2 class="section-title">Business Analytics</h2><div class="analytics-dashboard"><div class="analytics-card"><h3 id="totalLeads">0</h3><p>Total Leads</p></div><div class="analytics-card"><h3 id="conversionRate">0%</h3><p>Conversion Rate</p></div><div class="analytics-card"><h3 id="todayUpdates">0</h3><p>Today's Updates</p></div><div class="analytics-card"><h3 id="followUpPending">0</h3><p>Pending Follow-ups</p></div></div><div class="premium-card"><h3 class="section-title" style="font-size: 1.8rem; margin-bottom: 1.5rem;">Customer Count by Lead Source</h3><div id="sourceCountDashboard" class="form-grid"></div></div><div class="form-grid"><div class="premium-card"><h3 class="section-title" style="font-size: 1.5rem;">Lead Sources</h3><div class="chart-container"><canvas id="sourceChart"></canvas></div></div><div class="premium-card"><h3 class="section-title" style="font-size: 1.5rem;">Lead Status</h3><div class="chart-container"><canvas id="statusChart"></canvas></div></div></div></div>
+    </div>
+
+    <div id="updateModal" class="modal-premium"><div class="modal-content"><h2 class="section-title" style="margin-bottom: 1.5rem;">Update Customer & View History</h2><form id="updateForm"><input type="hidden" id="updateCustomerIdModal"><div class="form-grid"><div class="form-group"><label>Customer Name</label><input type="text" id="updateName" required></div><div class="form-group"><label>Phone Number</label><input type="tel" id="updatePhone" required></div><div class="form-group"><label>Email</label><input type="email" id="updateEmail"></div><div class="form-group"><label>Location</label><input type="text" id="updateLocation"></div><div class="form-group"><label>Status</label><select id="updateStatus"><option value="New">New</option><option value="Contacted">Contacted</option><option value="Interested">Interested</option><option value="Follow-up">Follow-up</option><option value="Converted">Converted</option><option value="Not Interested">Not Interested</option></select></div><div class="form-group"><label>Priority</label><select id="updatePriority"><option value="Low">Low</option><option value="Medium">Medium</option><option value="High">High</option></select></div><div class="form-group"><label>Next Follow-up Date</label><input type="date" id="updateFollowUp"></div></div><div style="margin-top: 2rem;"><h3 style="color: var(--gold-primary); margin-bottom: 1rem;"><i class="fas fa-history"></i> Recent History</h3><div id="customerUpdateHistory" style="max-height: 300px; overflow-y: auto;"></div></div><div style="text-align: center; margin-top: 2rem; display:flex; gap: 1rem; justify-content:center;"><button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Update Customer</button><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button></div></form></div></div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script>
+        // ▼▼▼ PASTE YOUR FIREBASE CONFIG OBJECT HERE ▼▼▼
+        const firebaseConfig = {
+            apiKey: "AIzaSyBJkFO2l12n4hKLbNd1vEMgz87GFzH77lg",
+            authDomain: "srikar-jewellers-crm.firebaseapp.com",
+            projectId: "srikar-jewellers-crm",
+            storageBucket: "srikar-jewellers-crm.appspot.com",
+            messagingSenderId: "377625912262",
+            appId: "1:377625912262:web:d6d05bec0d817e211b48c7",
+            measurementId: "G-06K93QM4V4"
+        };
+        // ▲▲▲ END OF CONFIG ▲▲▲
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        
+        const mainContainer = document.querySelector('.container');
+        const userEmailDisplay = document.getElementById('user-email-display');
+        const logoutButton = document.getElementById('logoutButton');
+        
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                // User is signed in, check their role
+                db.collection('users').doc(user.uid).get().then(doc => {
+                    if (doc.exists && doc.data().role === 'Admin') {
+                        // If Admin, show the app
+                        mainContainer.style.display = 'block';
+                        userEmailDisplay.textContent = user.email;
+                        initializeApp();
+                    } else {
+                        // If not Admin (or no role), log them out and redirect
+                        alert('Access Denied. You do not have Admin privileges.');
+                        auth.signOut();
+                        window.location.href = '/login.html';
+                    }
+                }).catch(err => {
+                    console.error("Error getting user role:", err);
+                    auth.signOut();
+                    window.location.href = '/login.html';
+                });
+            } else {
+                // User is not signed in, redirect them to the login page
+                window.location.href = '/login.html';
+            }
+        });
+
+        logoutButton.addEventListener('click', () => {
+            auth.signOut();
+        });
+        
+        // This function holds all the original CRM logic. It only runs if a user is a logged-in Admin.
+        function initializeApp() {
+            let customers = [];
+            let dailyUpdates = [];
+            let charts = {};
+            const modal = document.getElementById('updateModal');
+
+            async function loadAllDataFromServer() {
+                try {
+                    const response = await fetch('/.netlify/functions/get-all-data');
+                    if (!response.ok) throw new Error('Server error!');
+                    const data = await response.json();
+                    customers = data.customers.sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded));
+                    dailyUpdates = data.dailyUpdates.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    renderAll();
+                } catch (error) { showNotification("Could not load data from the cloud.", false); }
+            }
+
+            function setupEventListeners() {
+                document.getElementById('customerForm').addEventListener('submit', handleAddCustomer);
+                document.getElementById('dailyUpdateForm').addEventListener('submit', handleAddDailyUpdate);
+                document.getElementById('updateForm').addEventListener('submit', handleUpdateCustomer);
+                document.getElementById('historySearchInput').addEventListener('input', handleHistorySearchInput);
+                modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+            }
+
+            async function handleApiRequest(endpoint, body, successMessage) {
+                try {
+                    const response = await fetch(`/.netlify/functions/${endpoint}`, { method: 'POST', body: JSON.stringify(body) });
+                    if (!response.ok) throw new Error('Server request failed');
+                    if (successMessage) showNotification(successMessage, true);
+                    return true;
+                } catch (error) {
+                    showNotification(`Error: ${error.message}`, false);
+                    return false;
+                }
+            }
+            
+            async function handleAddCustomer(e) {
+                e.preventDefault();
+                const form = e.target;
+                const button = form.querySelector('button[type="submit"]');
+                toggleButtonLoading(button, true);
+                const newCustomer = {
+                    dateAdded: new Date().toISOString(),
+                    name: form.elements.customerName.value.trim() || `Lead ${form.elements.phoneNumber.value.trim()}`, phone: form.elements.phoneNumber.value.trim(), email: form.elements.email.value.trim(), location: form.elements.location.value.trim(), adSource: form.elements.adSource.value, interestedProduct: form.elements.interestedProduct.value.trim(), budget: form.elements.budget.value, leadStatus: form.elements.leadStatus.value, priority: form.elements.priority.value, nextFollowUp: form.elements.nextFollowUp.value,
+                    notes: [{ date: new Date().toISOString(), text: form.elements.initialResponse.value.trim() }]
+                };
+                if (await handleApiRequest('add-customer', newCustomer, 'Customer saved!')) {
+                    form.reset();
+                    await loadAllDataFromServer();
+                }
+                toggleButtonLoading(button, false, '<i class="fas fa-save"></i> Save Customer');
+            }
+
+            async function handleAddDailyUpdate(e) {
+                e.preventDefault();
+                const form = e.target;
+                const button = form.querySelector('button[type="submit"]');
+                toggleButtonLoading(button, true);
+                const newUpdate = {
+                    date: new Date().toISOString(), customerId: form.elements.updateCustomerId.value, supportPerson: form.elements.supportPerson.value.trim(), interactionType: form.elements.callStatus.value, comment: form.elements.dailyComment.value.trim(),
+                };
+                const customer = customers.find(c => c.id === newUpdate.customerId);
+                if (customer) newUpdate.customerName = customer.name;
+                if (!newUpdate.customerId) { showNotification("Please select a customer.", false); toggleButtonLoading(button, false, '<i class="fas fa-comment-medical"></i> Add Update'); return; }
+                if (await handleApiRequest('add-daily-update', newUpdate, 'Update saved!')) {
+                    form.reset();
+                    await loadAllDataFromServer();
+                }
+                toggleButtonLoading(button, false, '<i class="fas fa-comment-medical"></i> Add Update');
+            }
+
+            async function handleUpdateCustomer(e) {
+                e.preventDefault();
+                const form = e.target;
+                const button = form.querySelector('button[type="submit"]');
+                toggleButtonLoading(button, true);
+                const customerId = document.getElementById('updateCustomerIdModal').value;
+                const updatedData = {
+                    name: document.getElementById('updateName').value.trim(), phone: document.getElementById('updatePhone').value.trim(), email: document.getElementById('updateEmail').value.trim(), location: document.getElementById('updateLocation').value.trim(), leadStatus: document.getElementById('updateStatus').value, priority: document.getElementById('updatePriority').value, nextFollowUp: document.getElementById('updateFollowUp').value,
+                };
+                if (await handleApiRequest('update-customer', { id: customerId, data: updatedData }, 'Customer updated!')) {
+                    closeModal();
+                    await loadAllDataFromServer();
+                }
+                toggleButtonLoading(button, false, '<i class="fas fa-save"></i> Update Customer');
+            }
+
+            async function handleDeleteCustomer(customerId) {
+                if (!confirm('Are you sure you want to delete this customer and all their history? This cannot be undone.')) return;
+                if (await handleApiRequest('delete-customer', { id: customerId }, 'Customer deleted.')) {
+                    await loadAllDataFromServer();
+                }
+            }
+
+            function renderAll() {
+                const filtered = getFilteredCustomers();
+                displayCustomers(filtered);
+                displayDailyUpdates();
+                displayFollowUps();
+                populateCustomerSelectors();
+                populateProductDatalist();
+                populateHistoryDatalist();
+                updateAnalyticsDashboard(filtered);
+                if (document.querySelector('#analytics.tab-content.active')) { renderCharts(filtered); }
+            }
+            
+            function getFilteredCustomers() {
+                const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+                const statusFilter = document.getElementById('statusFilter').value;
+                const productFilter = document.getElementById('productFilter').value.toLowerCase();
+                return customers.filter(c => {
+                    const matchesSearch = !searchTerm || c.name.toLowerCase().includes(searchTerm) || c.phone.includes(searchTerm);
+                    const matchesStatus = !statusFilter || c.leadStatus === statusFilter;
+                    const matchesProduct = !productFilter || (c.interestedProduct && c.interestedProduct.toLowerCase().includes(productFilter));
+                    return matchesSearch && matchesStatus && matchesProduct;
+                });
+            }
+
+            function displayCustomers(filteredCustomers) {
+                const tableBody = document.getElementById('customerTableBody');
+                document.getElementById('customerTableHeader').innerHTML = `<tr><th>Customer</th><th>Contact</th><th>Interest</th><th>Status</th><th>Next Follow-up</th><th>Actions</th></tr>`;
+                if (filteredCustomers.length === 0) { tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 3rem;">No customers match your filters.</td></tr>'; return; }
+                tableBody.innerHTML = filteredCustomers.map(cust => `
+                    <tr id="customer-row-${cust.id}">
+                        <td data-label="Customer"><strong>${cust.name}</strong><br><small>${cust.location || 'N/A'}</small></td>
+                        <td data-label="Contact" class="contact-links">
+                            <a href="tel:${cust.phone}" class="phone-link"><i class="fas fa-phone"></i> Call</a>
+                            <a href="https://wa.me/${formatPhoneForWhatsApp(cust.phone)}" class="whatsapp-link" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+                        </td>
+                        <td data-label="Interest">${cust.interestedProduct || 'N/A'}</td>
+                        <td data-label="Status">${cust.leadStatus}</td>
+                        <td data-label="Next Follow-up">${cust.nextFollowUp || 'N/A'}</td>
+                        <td data-label="Actions">
+                            <button class="btn btn-secondary" style="padding: 5px 10px;" onclick="openUpdateModal('${cust.id}')"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-danger" style="padding: 5px 10px;" onclick="handleDeleteCustomer('${cust.id}')"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>`).join('');
+            }
+            
+            function displayDailyUpdates() {
+                const list = document.getElementById('dailyUpdatesList');
+                if (dailyUpdates.length === 0) { list.innerHTML = '<p style="text-align:center;">No recent updates.</p>'; return; }
+                list.innerHTML = dailyUpdates.slice(0, 25).map(update => {
+                    const customer = customers.find(c => c.id === update.customerId);
+                    return `<div style="border-left: 3px solid var(--gold-primary); padding-left: 1rem; margin-bottom: 1rem;"><div style="display: flex; justify-content: space-between;"><strong>${update.customerName || (customer ? customer.name : 'Unknown')}</strong><small>${new Date(update.date).toLocaleDateString()}</small></div><p><em>By: ${update.supportPerson} | ${update.interactionType}</em></p><p>${update.comment}</p></div>`;
+                }).join('');
+            }
+
+            function displayFollowUps() {
+                const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+                const todayEnd = new Date(); todayEnd.setHours(23, 59, 59, 999);
+                const priorityOrder = { 'High': 1, 'Medium': 2, 'Low': 3 };
+                const dateAndPrioritySort = (a, b) => {
+                    const dateComparison = new Date(a.nextFollowUp) - new Date(b.nextFollowUp);
+                    if (dateComparison !== 0) return dateComparison;
+                    const priorityA = priorityOrder[a.priority] || 99;
+                    const priorityB = priorityOrder[b.priority] || 99;
+                    return priorityA - priorityB;
+                };
+                const overdue = customers.filter(c => c.nextFollowUp && new Date(c.nextFollowUp) < todayStart).sort(dateAndPrioritySort);
+                const today = customers.filter(c => c.nextFollowUp && new Date(c.nextFollowUp) >= todayStart && new Date(c.nextFollowUp) <= todayEnd).sort((a, b) => (priorityOrder[a.priority] || 99) - (priorityOrder[b.priority] || 99));
+                const upcoming = customers.filter(c => c.nextFollowUp && new Date(c.nextFollowUp) > todayEnd).sort(dateAndPrioritySort);
+                const renderList = (custs, isOverdue = false) => {
+                    if (custs.length === 0) return `<p style="color: var(--text-secondary); text-align: center; padding: 1rem;">None</p>`;
+                    return custs.map(c => `<div class="follow-up-item ${isOverdue ? 'overdue' : ''}" onclick="openUpdateModal('${c.id}')"><strong>${c.name}</strong> (${c.phone})<br><small>Priority: ${c.priority || 'N/A'}</small><br><small>Due: ${new Date(c.nextFollowUp).toLocaleDateString()}</small></div>`).join('');
+                };
+                document.getElementById('overdueFollowUps').innerHTML = renderList(overdue, true);
+                document.getElementById('todayFollowUps').innerHTML = renderList(today);
+                document.getElementById('upcomingFollowUps').innerHTML = renderList(upcoming);
+            }
+
+            function populateCustomerSelectors() {
+                const selector = document.getElementById('updateCustomerId');
+                selector.innerHTML = '<option value="">Choose Customer...</option>';
+                customers.forEach(customer => {
+                    const option = document.createElement('option'); option.value = customer.id; option.textContent = `${customer.name} - ${customer.phone}`; selector.appendChild(option);
+                });
+            }
+            
+            function populateProductDatalist() {
+                const productList = document.getElementById('productList');
+                if(!customers || customers.length === 0) return;
+                const uniqueProducts = [...new Set(customers.map(c => c.interestedProduct).filter(p => p))];
+                productList.innerHTML = uniqueProducts.map(p => `<option value="${p}"></option>`).join('');
+            }
+            
+            function populateHistoryDatalist() {
+                const datalist = document.getElementById('historyCustomerList');
+                if(!customers || !datalist) return;
+                datalist.innerHTML = customers.map(customer => `<option value="${customer.name} - ${customer.phone}" data-id="${customer.id}"></option>`).join('');
+            }
+            
+            function handleHistorySearchInput(event) {
+                const value = event.target.value;
+                const options = document.getElementById('historyCustomerList').options;
+                for (let i = 0; i < options.length; i++) {
+                    if (options[i].value === value) {
+                        displayFullCustomerHistory(options[i].getAttribute('data-id'));
+                        break;
+                    }
+                }
+            }
+
+            function searchAndDisplayHistory() {
+                const value = document.getElementById('historySearchInput').value;
+                const options = document.getElementById('historyCustomerList').options;
+                let customerId = null;
+                for (let i = 0; i < options.length; i++) {
+                    if (options[i].value === value) {
+                        customerId = options[i].getAttribute('data-id');
+                        break;
+                    }
+                }
+                if (customerId) {
+                    displayFullCustomerHistory(customerId);
+                } else {
+                    showNotification("Please select a valid customer from the list.", false);
+                }
+            }
+
+            function displayFullCustomerHistory(customerId) {
+                const container = document.getElementById('customerHistoryLog');
+                if (!customerId) { container.style.display = 'none'; return; }
+                container.style.display = 'block';
+                const customer = customers.find(c => c.id === customerId);
+                const customerUpdates = dailyUpdates.filter(u => u.customerId === customerId);
+                const customerNotes = customer.notes || [];
+                const history = [...customerUpdates, ...customerNotes].sort((a,b) => new Date(b.date) - new Date(a.date));
+                if (history.length === 0) { container.innerHTML = '<p>No history recorded for this customer.</p>'; return; }
+                container.innerHTML = history.map(item => {
+                    const itemDate = new Date(item.date).toLocaleString('en-IN');
+                    if (item.text) { 
+                        return `<div style="border-left: 3px solid #5bc0de; padding-left: 1rem; margin-bottom: 1rem;"><strong>Initial Note</strong> <small>(${itemDate})</small><p>${item.text}</p></div>`;
+                    } else {
+                        return `<div style="border-left: 3px solid var(--gold-primary); padding-left: 1rem; margin-bottom: 1rem;"><strong>Update by ${item.supportPerson}</strong> <small>(${itemDate})</small><p><em>Interaction: ${item.interactionType}</em></p><p>${item.comment}</p></div>`;
+                    }
+                }).join('');
+            }
+
+            function updateAnalyticsDashboard(filteredCustomers) {
+                const dataSet = filteredCustomers || customers;
+                const total = dataSet.length;
+                const converted = dataSet.filter(c => c.leadStatus === 'Converted').length;
+                const today = new Date().toISOString().split('T')[0];
+                const todayUpdatesCount = dailyUpdates.filter(u => u.date.startsWith(today)).length;
+                const pendingFollowUps = dataSet.filter(c => c.nextFollowUp && new Date(c.nextFollowUp) < new Date()).length;
+                document.getElementById('totalLeads').textContent = total;
+                document.getElementById('conversionRate').textContent = total > 0 ? `${Math.round((converted/total)*100)}%` : '0%';
+                document.getElementById('todayUpdates').textContent = todayUpdatesCount;
+                document.getElementById('followUpPending').textContent = pendingFollowUps;
+                const sourceCounts = dataSet.reduce((acc, c) => { if (c.adSource) { acc[c.adSource] = (acc[c.adSource] || 0) + 1; } return acc; }, {});
+                const sourceDashboard = document.getElementById('sourceCountDashboard');
+                sourceDashboard.innerHTML = Object.keys(sourceCounts).map(source => `
+                    <div class="analytics-card analytics-card-small"><h4>${sourceCounts[source]}</h4><p>${source}</p></div>
+                `).join('');
+            }
+            
+            function renderCharts(filteredCustomers) {
+                const dataSet = filteredCustomers || customers;
+                Object.values(charts).forEach(chart => { if (chart.destroy) chart.destroy(); });
+                const chartLabelColor = '#AAAAAA';
+                const statusCounts = dataSet.reduce((acc, c) => { acc[c.leadStatus] = (acc[c.leadStatus] || 0) + 1; return acc; }, {});
+                charts.status = new Chart(document.getElementById('statusChart').getContext('2d'), { type: 'doughnut', data: { labels: Object.keys(statusCounts), datasets: [{ data: Object.values(statusCounts), backgroundColor: ['#DCCA87', '#5bc0de', '#5cb85c', '#f0ad4e', '#d9534f', '#8a6de9'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: chartLabelColor } } } } });
+                const sourceCounts = dataSet.reduce((acc, c) => { acc[c.adSource] = (acc[c.adSource] || 0) + 1; return acc; }, {});
+                charts.source = new Chart(document.getElementById('sourceChart').getContext('2d'), { type: 'pie', data: { labels: Object.keys(sourceCounts), datasets: [{ data: Object.values(sourceCounts), backgroundColor: ['#DCCA87', '#AAAAAA', '#F5EFE1', '#5bc0de', '#5cb85c'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: chartLabelColor } } } } });
+            }
+
+            function showTab(tabName, element) {
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+                document.getElementById(tabName).classList.add('active');
+                element.classList.add('active');
+                if (tabName !== 'add-customer' && tabName !== 'daily-updates') { renderAll(); }
+            }
+
+            function openUpdateModal(customerId) {
+                const customer = customers.find(c => c.id === customerId);
+                if (!customer) return;
+                const form = document.getElementById('updateForm');
+                form.elements.updateCustomerIdModal.value = customer.id; form.elements.updateName.value = customer.name; form.elements.updatePhone.value = customer.phone; form.elements.updateEmail.value = customer.email || ''; form.elements.updateLocation.value = customer.location || ''; form.elements.updateStatus.value = customer.leadStatus; form.elements.updatePriority.value = customer.priority; form.elements.updateFollowUp.value = customer.nextFollowUp || '';
+                displayCustomerHistoryInModal(customerId);
+                modal.classList.add('show');
+            }
+            
+            function displayCustomerHistoryInModal(customerId) {
+                const container = document.getElementById('customerUpdateHistory');
+                const customer = customers.find(c => c.id === customerId);
+                const customerUpdates = dailyUpdates.filter(u => u.customerId === customerId);
+                const customerNotes = customer.notes || [];
+                const history = [...customerUpdates, ...customerNotes].sort((a,b) => new Date(b.date) - new Date(a.date));
+                if (history.length === 0) { container.innerHTML = '<p>No history for this customer.</p>'; return; }
+                container.innerHTML = history.slice(0, 5).map(item => {
+                    const itemDate = new Date(item.date).toLocaleString('en-IN');
+                    if (item.text) {
+                        return `<div style="border-left: 3px solid #5bc0de; padding-left: 1rem; margin-bottom: 1rem;"><strong>Initial Note</strong> <small>(${itemDate})</small><p>${item.text}</p></div>`;
+                    } else {
+                        return `<div style="border-left: 3px solid var(--gold-primary); padding-left: 1rem; margin-bottom: 1rem;"><strong>Update by ${item.supportPerson}</strong> <small>(${itemDate})</small><p>${item.comment}</p></div>`;
+                    }
+                }).join('');
+            }
+
+            function closeModal() { modal.classList.remove('show'); }
+            function formatPhoneForWhatsApp(phone) { let cleaned = (phone || '').replace(/\D/g, ''); if (cleaned.length === 10) { cleaned = '91' + cleaned; } return cleaned; }
+            function toggleButtonLoading(button, isLoading, defaultButtonText = '') { if(button){ button.disabled = isLoading; button.innerHTML = isLoading ? '<i class="fas fa-spinner fa-spin"></i>' : defaultButtonText; }}
+            function showNotification(message, isSuccess = true) {
+                const notification = document.createElement('div');
+                notification.className = 'premium-notification';
+                notification.innerHTML = `<i class="fas fa-${isSuccess ? 'check-circle' : 'times-circle'}"></i> ${message}`;
+                document.body.appendChild(notification);
+                setTimeout(() => { if (notification.parentNode) notification.parentNode.removeChild(notification); }, 5000);
+            }
+            
+            // Initialize the app
+            loadAllDataFromServer();
+            setupEventListeners();
+        }
+    </script>
+</body>
+</html>
