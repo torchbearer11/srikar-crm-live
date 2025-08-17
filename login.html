@@ -14,89 +14,58 @@
         label { display: block; margin-bottom: 0.5rem; font-size: 0.9rem; }
         input { box-sizing: border-box; width: 100%; padding: 0.8rem; border: 1px solid #333; border-radius: 8px; background-color: #222; color: var(--text-primary); font-size: 1rem; }
         button { width: 100%; padding: 0.8rem; background-color: var(--gold-primary); color: var(--dark-bg); border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; }
-        button:disabled { background-color: #555; cursor: not-allowed;}
         #error-message { color: #d9534f; margin-top: 1rem; height: 1em; font-size: 0.9rem; }
-        .hidden { display: none; }
     </style>
 </head>
 <body>
     <div class="login-container">
         <h1>Staff Login</h1>
-        <form id="phoneForm" class="form-group">
-            <label for="phone-number">Phone Number (with country code, e.g., +91)</label>
-            <input type="tel" id="phone-number" required>
-            <button type="submit" style="margin-top: 1rem;">Send Verification Code</button>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required>
+            </div>
+            <button type="submit">Login</button>
+            <p id="error-message"></p>
         </form>
-        <form id="codeForm" class="form-group hidden">
-            <label for="verification-code">Verification Code</label>
-            <input type="text" id="verification-code" required>
-            <button type="submit" style="margin-top: 1rem;">Sign In</button>
-        </form>
-        <div id="recaptcha-container"></div>
-        <p id="error-message"></p>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script>
-        // ▼▼▼ PASTE YOUR FIREBASE CONFIG OBJECT HERE ▼▼▼
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
+            apiKey: "AIzaSyBJkFO2l12n4hKLbNd1vEMgz87GFzH77lg",
+            authDomain: "srikar-jewellers-crm.firebaseapp.com",
+            projectId: "srikar-jewellers-crm",
+            storageBucket: "srikar-jewellers-crm.appspot.com",
+            messagingSenderId: "377625912262",
+            appId: "1:377625912262:web:d6d05bec0d817e211b48c7",
+            measurementId: "G-06K93QM4V4"
         };
-        // ▲▲▲ END OF CONFIG ▲▲▲
 
         firebase.initializeApp(firebaseConfig);
+
         const auth = firebase.auth();
-
-        const phoneForm = document.getElementById('phoneForm');
-        const codeForm = document.getElementById('codeForm');
+        const loginForm = document.getElementById('loginForm');
         const errorMessage = document.getElementById('error-message');
-        
-        window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-            'size': 'invisible',
-            'callback': (response) => { /* reCAPTCHA solved */ }
-        });
 
-        phoneForm.addEventListener('submit', (e) => {
+        loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const phoneNumber = document.getElementById('phone-number').value;
-            const appVerifier = window.recaptchaVerifier;
-            const button = e.target.querySelector('button');
-            button.disabled = true;
-            errorMessage.textContent = 'Sending code...';
+            const email = loginForm.email.value;
+            const password = loginForm.password.value;
 
-            auth.signInWithPhoneNumber(phoneNumber, appVerifier)
-                .then((confirmationResult) => {
-                    window.confirmationResult = confirmationResult;
-                    errorMessage.textContent = 'Verification code sent!';
-                    phoneForm.classList.add('hidden');
-                    codeForm.classList.remove('hidden');
-                }).catch((error) => {
-                    errorMessage.textContent = 'Error sending code. Check number or try again.';
-                    console.error('SMS Error:', error);
-                    button.disabled = false;
-                    recaptchaVerifier.render().then(widgetId => recaptchaVerifier.reset(widgetId));
+            auth.signInWithEmailAndPassword(email, password)
+                .then(userCredential => {
+                    window.location.href = '/'; // Redirect to main CRM page on success
+                })
+                .catch(error => {
+                    errorMessage.textContent = 'Error: Invalid email or password.';
+                    console.error('Login Error:', error);
                 });
-        });
-
-        codeForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const code = document.getElementById('verification-code').value;
-            const button = e.target.querySelector('button');
-            button.disabled = true;
-
-            window.confirmationResult.confirm(code).then((result) => {
-                const user = result.user;
-                window.location.href = '/'; // Redirect to main CRM
-            }).catch((error) => {
-                errorMessage.textContent = 'Error: Invalid code.';
-                button.disabled = false;
-            });
         });
     </script>
 </body>
