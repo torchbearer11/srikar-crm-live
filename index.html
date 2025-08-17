@@ -29,13 +29,9 @@
         .premium-card {background: #111111;border: 1px solid rgba(220, 202, 135, 0.1);border-radius: 15px;padding: 1.5rem;margin-bottom: 2rem;}
         .form-grid {display: grid;grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));gap: 1.5rem;}
         .btn {padding: 0.8rem 1.8rem;border: 1px solid var(--gold-primary);border-radius: 8px;cursor: pointer;font-size: 1rem;font-weight: 600;text-transform: uppercase;transition: var(--transition-fast);}
-        .btn-primary {background: var(--gold-primary);color: var(--dark-bg);}
-        .btn-secondary {background: transparent;color: var(--gold-primary);}
         .premium-table {width: 100%;border-collapse: collapse;background: #111111;border-radius: 15px;overflow: hidden;}
         .premium-table th, .premium-table td {padding: 1.2rem 1rem;text-align: left;border-bottom: 1px solid rgba(220, 202, 135, 0.1);}
         .premium-table th {background: var(--dark-secondary);color: var(--gold-primary);text-transform: uppercase;}
-        .premium-table tbody tr:hover {background: var(--dark-secondary);}
-        
         @media (max-width: 768px) {
             .premium-table thead { display: none; }
             .premium-table, .premium-table tbody, .premium-table tr, .premium-table td { display: block; width: 100%; }
@@ -55,57 +51,44 @@
                 <button id="logoutButton" class="btn btn-secondary" style="padding: 0.5rem 1rem;">Logout</button>
             </div>
         </header>
-        
         <div class="nav-tabs">
-            <button class="tab-button staff-tab admin-tab" onclick="showTab('my-tasks', this)"><i class="fas fa-tasks"></i> My Tasks</button>
+            <button class="tab-button staff-tab" onclick="showTab('my-tasks', this)"><i class="fas fa-tasks"></i> My Tasks</button>
             <button class="tab-button staff-tab" onclick="showTab('attendance', this)"><i class="fas fa-clock"></i> Attendance</button>
-            
             <button class="tab-button admin-tab" onclick="showTab('add-customer', this)"><i class="fas fa-plus-circle"></i> Add Customer</button>
             <button class="tab-button admin-tab" onclick="showTab('customer-list', this)"><i class="fas fa-users"></i> Customer Database</button>
-            <button class="tab-button admin-tab" onclick="showTab('task-management', this)"><i class="fas fa-clipboard-list"></i> Task Management</button>
             <button class="tab-button admin-tab" onclick="showTab('staff-management', this)"><i class="fas fa-user-shield"></i> Staff Management</button>
-            <button class="tab-button admin-tab" onclick="showTab('analytics', this)"><i class="fas fa-chart-pie"></i> Analytics</button>
         </div>
 
-        <div id="my-tasks" class="tab-content staff-tab admin-tab">
+        <div id="my-tasks" class="tab-content staff-tab">
             <h2 class="section-title">My Assigned Tasks</h2>
-            <div class="premium-card">This is where your assigned tasks will appear.</div>
+            <div class="premium-card"><p>Your assigned tasks will appear here.</p></div>
         </div>
-
         <div id="attendance" class="tab-content staff-tab">
             <h2 class="section-title">Log Attendance</h2>
-             <div class="premium-card">This is where your attendance buttons and log will appear.</div>
+            <div class="premium-card"><p>Your attendance tools will appear here.</p></div>
         </div>
 
         <div id="add-customer" class="tab-content admin-tab">
-             <h2 class="section-title">Record New Lead</h2>
-             <div class="premium-card">
-                <p>Add Customer Form will be here.</p>
-             </div>
+            <h2 class="section-title">Record New Lead</h2>
+            <div class="premium-card">
+                <form id="customerForm">
+                    <div class="form-grid">
+                        <div class="form-group"><label for="customerName">Customer Name</label><input type="text" id="customerName"></div>
+                        <div class="form-group"><label for="phoneNumber">Phone Number *</label><input type="tel" id="phoneNumber" required></div>
+                        <div class="form-group"><label for="email">Email Address</label><input type="email" id="email"></div>
+                        <div class="form-group"><label for="location">Location</label><input type="text" id="location"></div>
+                    </div>
+                    <div style="text-align: center; margin-top: 2rem;"><button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Customer</button></div>
+                </form>
+            </div>
         </div>
         <div id="customer-list" class="tab-content admin-tab">
             <h2 class="section-title">Customer Database</h2>
-             <div class="premium-card">
-                <p>Customer Database will be here.</p>
-             </div>
-        </div>
-        <div id="task-management" class="tab-content admin-tab">
-            <h2 class="section-title">Manage & Assign Tasks</h2>
-             <div class="premium-card">
-                <p>Task Management tools will be here.</p>
-             </div>
+            <div class="table-container"><table class="premium-table"><thead id="customerTableHeader"></thead><tbody id="customerTableBody"></tbody></table></div>
         </div>
         <div id="staff-management" class="tab-content admin-tab">
             <h2 class="section-title">Manage Staff</h2>
-             <div class="premium-card">
-                <p>Staff Management tools will be here.</p>
-             </div>
-        </div>
-        <div id="analytics" class="tab-content admin-tab">
-            <h2 class="section-title">Performance Analytics</h2>
-             <div class="premium-card">
-                <p>Analytics dashboards will be here.</p>
-             </div>
+            <div class="premium-card"><p>Staff management and task assignment tools will appear here.</p></div>
         </div>
     </div>
 
@@ -132,25 +115,24 @@
         const userEmailDisplay = document.getElementById('user-email-display');
         const logoutButton = document.getElementById('logoutButton');
         const portalTitle = document.getElementById('portal-title');
+        
+        let customers = []; // Global state for customer data
 
         auth.onAuthStateChanged(async user => {
             if (user) {
                 try {
                     const userDoc = await db.collection('users').doc(user.uid).get();
                     if (userDoc.exists) {
-                        const userRole = userDoc.data().role; // 'Admin' or 'Staff'
+                        const userRole = userDoc.data().role;
+                        initializeApp(userRole);
                         mainContainer.classList.remove('hidden');
                         userEmailDisplay.textContent = user.email;
-                        setupUIForRole(userRole);
-                    } else {
-                        throw new Error("User role not found.");
-                    }
+                    } else { throw new Error("User role not found."); }
                 } catch (error) {
                     alert('Error: Could not verify user role. Logging out.');
                     auth.signOut();
                 }
             } else {
-                // If on any page other than login.html, redirect
                 if (!window.location.pathname.endsWith('login.html')) {
                     window.location.href = '/login.html';
                 }
@@ -158,6 +140,14 @@
         });
 
         logoutButton.addEventListener('click', () => auth.signOut());
+        
+        function initializeApp(userRole) {
+            setupUIForRole(userRole);
+            if (userRole === 'Admin') {
+                loadAllAdminData();
+                setupAdminEventListeners();
+            }
+        }
 
         function setupUIForRole(role) {
             if (role === 'Admin') {
@@ -165,7 +155,7 @@
                 document.querySelectorAll('.admin-tab').forEach(el => el.classList.remove('hidden'));
                 document.querySelectorAll('.staff-tab').forEach(el => el.classList.add('hidden'));
                 showTab('add-customer', document.querySelector('.nav-tabs button.admin-tab'));
-            } else { // Assumes 'Staff' role
+            } else {
                 portalTitle.textContent = "Staff Portal";
                 document.querySelectorAll('.admin-tab').forEach(el => el.classList.add('hidden'));
                 document.querySelectorAll('.staff-tab').forEach(el => el.classList.remove('hidden'));
@@ -177,10 +167,70 @@
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
             document.getElementById(tabName).classList.add('active');
-            if (element) {
-                element.classList.add('active');
+            if (element) element.classList.add('active');
+        }
+
+        // === ADMIN-SPECIFIC FUNCTIONS ===
+        function setupAdminEventListeners() {
+            document.getElementById('customerForm').addEventListener('submit', handleAddCustomer);
+        }
+
+        async function loadAllAdminData() {
+            try {
+                const response = await fetch('/.netlify/functions/get-all-data');
+                if (!response.ok) throw new Error('Server error!');
+                const data = await response.json();
+                customers = data.customers.sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded));
+                renderAdminData();
+            } catch (error) {
+                console.error("Could not load admin data", error);
             }
         }
+
+        function renderAdminData() {
+            displayCustomers(customers);
+        }
+
+        function displayCustomers(customerList) {
+            const tableBody = document.getElementById('customerTableBody');
+            document.getElementById('customerTableHeader').innerHTML = `<tr><th>Customer</th><th>Contact</th><th>Location</th><th>Actions</th></tr>`;
+            if (customerList.length === 0) { tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 3rem;">No customers found.</td></tr>'; return; }
+            tableBody.innerHTML = customerList.map(cust => `
+                <tr id="customer-row-${cust.id}">
+                    <td data-label="Customer"><strong>${cust.name}</strong></td>
+                    <td data-label="Contact"><a href="tel:${cust.phone}">${cust.phone}</a></td>
+                    <td data-label="Location">${cust.location || 'N/A'}</td>
+                    <td data-label="Actions">
+                         <button class="btn btn-secondary" style="padding: 5px 10px;">Edit</button>
+                    </td>
+                </tr>`).join('');
+        }
+
+        async function handleAddCustomer(e) {
+            e.preventDefault();
+            const form = e.target;
+            const button = form.querySelector('button[type="submit"]');
+            button.disabled = true;
+            const newCustomer = {
+                dateAdded: new Date().toISOString(),
+                name: form.elements.customerName.value.trim() || `Lead ${form.elements.phoneNumber.value.trim()}`,
+                phone: form.elements.phoneNumber.value.trim(),
+                email: form.elements.email.value.trim(),
+                location: form.elements.location.value.trim()
+            };
+            try {
+                const response = await fetch(`/.netlify/functions/add-customer`, { method: 'POST', body: JSON.stringify(newCustomer) });
+                if (!response.ok) throw new Error('Server request failed');
+                alert('Customer Saved!');
+                form.reset();
+                await loadAllAdminData();
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            } finally {
+                button.disabled = false;
+            }
+        }
+
     </script>
 </body>
 </html>
