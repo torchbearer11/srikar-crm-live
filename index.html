@@ -69,27 +69,44 @@
 
         <div id="my-tasks" class="tab-content staff-tab admin-tab">
             <h2 class="section-title">My Assigned Tasks</h2>
-            </div>
+            <div class="premium-card">This is where your assigned tasks will appear.</div>
+        </div>
 
         <div id="attendance" class="tab-content staff-tab">
             <h2 class="section-title">Log Attendance</h2>
-            </div>
+             <div class="premium-card">This is where your attendance buttons and log will appear.</div>
+        </div>
 
         <div id="add-customer" class="tab-content admin-tab">
-            <h2 class="section-title">Record New Lead</h2>
-            </div>
+             <h2 class="section-title">Record New Lead</h2>
+             <div class="premium-card">
+                <p>Add Customer Form will be here.</p>
+             </div>
+        </div>
         <div id="customer-list" class="tab-content admin-tab">
             <h2 class="section-title">Customer Database</h2>
-            </div>
+             <div class="premium-card">
+                <p>Customer Database will be here.</p>
+             </div>
+        </div>
         <div id="task-management" class="tab-content admin-tab">
             <h2 class="section-title">Manage & Assign Tasks</h2>
-            </div>
+             <div class="premium-card">
+                <p>Task Management tools will be here.</p>
+             </div>
+        </div>
         <div id="staff-management" class="tab-content admin-tab">
             <h2 class="section-title">Manage Staff</h2>
-            </div>
+             <div class="premium-card">
+                <p>Staff Management tools will be here.</p>
+             </div>
+        </div>
         <div id="analytics" class="tab-content admin-tab">
             <h2 class="section-title">Performance Analytics</h2>
-            </div>
+             <div class="premium-card">
+                <p>Analytics dashboards will be here.</p>
+             </div>
+        </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
@@ -115,60 +132,43 @@
         const userEmailDisplay = document.getElementById('user-email-display');
         const logoutButton = document.getElementById('logoutButton');
         const portalTitle = document.getElementById('portal-title');
-        let currentUserRole = null;
 
-        // SECURITY GUARD: This runs on every page load
         auth.onAuthStateChanged(async user => {
             if (user) {
-                // User is signed in, check their role from the database
                 try {
                     const userDoc = await db.collection('users').doc(user.uid).get();
                     if (userDoc.exists) {
-                        currentUserRole = userDoc.data().role; // 'Admin' or 'Staff'
-                        initializeApp(currentUserRole); // Start the app with the user's role
+                        const userRole = userDoc.data().role; // 'Admin' or 'Staff'
                         mainContainer.classList.remove('hidden');
                         userEmailDisplay.textContent = user.email;
+                        setupUIForRole(userRole);
                     } else {
-                        // This user exists in Auth but not in our 'users' collection with a role
-                        throw new Error("User role not found in database.");
+                        throw new Error("User role not found.");
                     }
                 } catch (error) {
-                    alert('Error: Could not verify user role. Please contact administrator.');
+                    alert('Error: Could not verify user role. Logging out.');
                     auth.signOut();
                 }
             } else {
-                // User is not signed in, force redirect to login page
-                const isNotLoginPage = !window.location.pathname.endsWith('login.html');
-                if (isNotLoginPage) {
+                // If on any page other than login.html, redirect
+                if (!window.location.pathname.endsWith('login.html')) {
                     window.location.href = '/login.html';
                 }
             }
         });
 
         logoutButton.addEventListener('click', () => auth.signOut());
-        
-        // This function initializes the entire application after login is verified
-        function initializeApp(userRole) {
-            setupUIForRole(userRole);
-            // From here, you would load the data relevant to the user's role
-            // For example:
-            // if (userRole === 'Admin') { loadAllAdminData(); }
-            // if (userRole === 'Staff') { loadMyTasks(); }
-        }
 
-        // This function shows/hides the correct UI elements for each role
         function setupUIForRole(role) {
             if (role === 'Admin') {
                 portalTitle.textContent = "Admin Portal";
                 document.querySelectorAll('.admin-tab').forEach(el => el.classList.remove('hidden'));
                 document.querySelectorAll('.staff-tab').forEach(el => el.classList.add('hidden'));
-                // Set the default active tab for Admins
                 showTab('add-customer', document.querySelector('.nav-tabs button.admin-tab'));
             } else { // Assumes 'Staff' role
                 portalTitle.textContent = "Staff Portal";
                 document.querySelectorAll('.admin-tab').forEach(el => el.classList.add('hidden'));
                 document.querySelectorAll('.staff-tab').forEach(el => el.classList.remove('hidden'));
-                // Set the default active tab for Staff
                 showTab('my-tasks', document.querySelector('.nav-tabs button.staff-tab'));
             }
         }
