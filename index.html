@@ -3,34 +3,163 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Staff Dashboard - Srikar Jewellers</title>
-    </head>
+    <title>Srikar Jewellers CRM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {--gold-primary: #DCCA87;--gold-secondary: #F5EFE1;--dark-bg: #0C0C0C;--dark-secondary: #181818;--text-primary: #FFFFFF;--text-secondary: #AAAAAA;--transition-fast: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);}
+        * {margin: 0;padding: 0;box-sizing: border-box;}
+        body {font-family: 'Poppins', sans-serif;background-color: var(--dark-bg);color: var(--text-secondary);min-height: 100vh;}
+        .hidden { display: none !important; }
+        .container {max-width: 1800px;margin: 1rem;background: var(--dark-secondary);border: 1px solid rgba(220, 202, 135, 0.15);border-radius: 20px;overflow: hidden;}
+        .header {padding: 2rem 1.5rem;background: #111111;border-bottom: 1px solid rgba(220, 202, 135, 0.15);display: flex;align-items: center;justify-content: space-between;flex-wrap: wrap; gap: 1rem;}
+        .header-text h1 {font-family: 'Cormorant Garamond', serif;font-size: 2.5rem;color: var(--gold-primary);}
+        .header-user-info { display: flex; align-items: center; gap: 1rem; }
+        .logo-container .logo {width: 60px;height: 60px;border-radius: 50%;border: 2px solid var(--gold-primary);box-shadow: 0 0 20px rgba(220, 202, 135, 0.3);}
+        .nav-tabs {background: var(--dark-secondary);padding: 0 1rem;display: flex;border-bottom: 1px solid rgba(220, 202, 135, 0.1);overflow-x: auto;}
+        .nav-tabs button {background: transparent;border: none;padding: 1.2rem 1rem;font-size: 1rem;cursor: pointer;color: var(--text-secondary);border-bottom: 3px solid transparent;transition: var(--transition-fast);white-space: nowrap;}
+        .nav-tabs button:hover, .nav-tabs button.active {color: var(--gold-primary);}
+        .nav-tabs button.active {border-bottom-color: var(--gold-primary);}
+        .nav-tabs button i {margin-right: 0.75rem;}
+        .tab-content {padding: 1.5rem; display: none;}
+        .tab-content.active {display: block; animation: fadeIn 0.6s ease-out;}
+        @keyframes fadeIn {from {opacity: 0;transform: translateY(15px);} to {opacity: 1;transform: translateY(0);}}
+        .section-title {font-family: 'Cormorant Garamond', serif;font-size: 2.2rem;color: var(--gold-primary);margin-bottom: 2rem;text-align: center;}
+        .premium-card {background: #111111;border: 1px solid rgba(220, 202, 135, 0.1);border-radius: 15px;padding: 1.5rem;margin-bottom: 2rem;}
+        .form-grid {display: grid;grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));gap: 1.5rem;}
+        .btn {padding: 0.8rem 1.8rem;border: 1px solid var(--gold-primary);border-radius: 8px;cursor: pointer;font-size: 1rem;font-weight: 600;text-transform: uppercase;transition: var(--transition-fast);}
+        .btn-primary {background: var(--gold-primary);color: var(--dark-bg);}
+        .btn-secondary {background: transparent;color: var(--gold-primary);}
+        .premium-table {width: 100%;border-collapse: collapse;background: #111111;border-radius: 15px;overflow: hidden;}
+        .premium-table th, .premium-table td {padding: 1.2rem 1rem;text-align: left;border-bottom: 1px solid rgba(220, 202, 135, 0.1);}
+        .premium-table th {background: var(--dark-secondary);color: var(--gold-primary);text-transform: uppercase;}
+        .premium-table tbody tr:hover {background: var(--dark-secondary);}
+        
+        @media (max-width: 768px) {
+            .premium-table thead { display: none; }
+            .premium-table, .premium-table tbody, .premium-table tr, .premium-table td { display: block; width: 100%; }
+            .premium-table tr { margin-bottom: 1rem; border: 1px solid rgba(220, 202, 135, 0.15); border-radius: 10px; padding: 1rem; }
+            .premium-table td { padding: 0.75rem 0.5rem; padding-left: 50%; text-align: right; position: relative; border-bottom: 1px solid #222; display: flex; align-items: center; justify-content: flex-end; }
+            .premium-table td:last-child { border-bottom: none; }
+            .premium-table td::before { content: attr(data-label); position: absolute; left: 0.5rem; width: 45%; padding-right: 10px; white-space: nowrap; text-align: left; font-weight: bold; color: var(--gold-secondary); }
+        }
+    </style>
+</head>
 <body>
-    <div class="container">
+    <div class="container hidden">
         <header class="header">
-            <div class="header-text"><h1>Staff Dashboard</h1></div>
+            <div class="header-text"><h1>Srikar Jewellers</h1><p id="portal-title">CRM Portal</p></div>
             <div class="header-user-info">
-                <span id="user-email-display"></span>
-                <button id="logoutButton" class="btn btn-secondary">Logout</button>
+                <span id="user-email-display" style="color: var(--gold-secondary);"></span>
+                <button id="logoutButton" class="btn btn-secondary" style="padding: 0.5rem 1rem;">Logout</button>
             </div>
         </header>
+        
         <div class="nav-tabs">
-            <button class="tab-button active" onclick="showTab('my-tasks', this)"><i class="fas fa-tasks"></i> My Tasks</button>
-            <button class="tab-button" onclick="showTab('attendance', this)"><i class="fas fa-clock"></i> Attendance</button>
+            <button class="tab-button staff-tab admin-tab" onclick="showTab('my-tasks', this)"><i class="fas fa-tasks"></i> My Tasks</button>
+            <button class="tab-button staff-tab" onclick="showTab('attendance', this)"><i class="fas fa-clock"></i> Attendance</button>
+            <button class="tab-button admin-tab" onclick="showTab('add-customer', this)"><i class="fas fa-plus-circle"></i> Add Customer</button>
+            <button class="tab-button admin-tab" onclick="showTab('customer-list', this)"><i class="fas fa-users"></i> Customer Database</button>
+            <button class="tab-button admin-tab" onclick="showTab('task-management', this)"><i class="fas fa-clipboard-list"></i> Task Management</button>
+            <button class="tab-button admin-tab" onclick="showTab('staff-management', this)"><i class="fas fa-user-shield"></i> Staff Management</button>
+            <button class="tab-button admin-tab" onclick="showTab('analytics', this)"><i class="fas fa-chart-pie"></i> Analytics</button>
         </div>
 
-        <div id="my-tasks" class="tab-content active">
+        <div id="my-tasks" class="tab-content">
             <h2 class="section-title">My Assigned Tasks</h2>
             </div>
-        <div id="attendance" class="tab-content">
+
+        <div id="attendance" class="tab-content staff-tab">
             <h2 class="section-title">Log Attendance</h2>
             </div>
+
+        <div id="add-customer" class="tab-content admin-tab">
+            <h2 class="section-title">Record New Lead</h2>
+            </div>
+        <div id="customer-list" class="tab-content admin-tab">
+            <h2 class="section-title">Customer Database</h2>
+            </div>
+        <div id="task-management" class="tab-content admin-tab">
+            <h2 class="section-title">Manage & Assign Tasks</h2>
+            </div>
+        <div id="staff-management" class="tab-content admin-tab">
+            <h2 class="section-title">Manage Staff</h2>
+            </div>
+        <div id="analytics" class="tab-content admin-tab">
+            <h2 class="section-title">Performance Analytics</h2>
+            </div>
     </div>
-    
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <script>
-        // PASTE your firebaseConfig here
-        // Add authentication check (like in the previous final version)
-        // Add JavaScript to fetch and display ONLY the logged-in staff member's tasks and handle attendance logging.
+        // PASTE YOUR FIREBASE CONFIG OBJECT HERE
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            // ...etc
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        
+        const mainContainer = document.querySelector('.container');
+        const userEmailDisplay = document.getElementById('user-email-display');
+        const logoutButton = document.getElementById('logoutButton');
+        const portalTitle = document.getElementById('portal-title');
+
+        auth.onAuthStateChanged(async user => {
+            if (user) {
+                try {
+                    const userDoc = await db.collection('users').doc(user.uid).get();
+                    if (userDoc.exists) {
+                        const userData = userDoc.data();
+                        initializeApp(userData.role); // Pass the user's role to the app
+                        mainContainer.classList.remove('hidden');
+                        userEmailDisplay.textContent = user.email;
+                    } else {
+                        throw new Error("User role not found.");
+                    }
+                } catch (error) {
+                    alert('Could not verify user role. Logging out.');
+                    auth.signOut();
+                }
+            } else {
+                window.location.href = '/login.html';
+            }
+        });
+
+        logoutButton.addEventListener('click', () => auth.signOut());
+
+        function initializeApp(userRole) {
+            // Show/hide tabs based on the user's role
+            if (userRole === 'Admin') {
+                portalTitle.textContent = "Admin Portal";
+                document.querySelectorAll('.admin-tab').forEach(el => el.classList.remove('hidden'));
+                document.querySelectorAll('.staff-tab').forEach(el => el.classList.add('hidden')); // Admins don't need the staff-only tabs
+                showTab('add-customer', document.querySelector('.nav-tabs button.admin-tab'));
+            } else { // Staff role
+                portalTitle.textContent = "Staff Portal";
+                document.querySelectorAll('.admin-tab').forEach(el => el.classList.add('hidden'));
+                document.querySelectorAll('.staff-tab').forEach(el => el.classList.remove('hidden'));
+                showTab('my-tasks', document.querySelector('.nav-tabs button.staff-tab'));
+            }
+
+            // All your other CRM functions (loadAllDataFromServer, handleAddCustomer, etc.)
+            // will be called from here and can also check the userRole variable if needed.
+        }
+
+        function showTab(tabName, element) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            element.classList.add('active');
+        }
+
     </script>
 </body>
 </html>
